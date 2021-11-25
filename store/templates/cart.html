@@ -1,0 +1,144 @@
+{% extends 'base.html' %} {% block title %}Cart{% endblock title %} {% block body %} {% load cart %}
+<div class="continer">
+    <div class="p-4 m-4">
+        <div class="col-lg-10 mx-auto border rounded p-4" style="background-color: white;">
+            <h2 class="alert">Cart</h2>
+            <table class="table">
+                <thead>
+                    <tr style="text-align: center;">
+                        <th scope="col">Sr.No</th>
+                        <th scope="col">Image</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr style="text-align: center;">
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td><img src="{{product.image}}" style="height: 80px;" alt=""></td>
+                        <td>{{product.name}}</td>
+                        <td> {% if product|cart_product:request.session.cart %}
+                            <div class="btn-group">
+                                <form action="cart" method="post" class="mx-2">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{product.id}}">
+                                    <input hidden type="text" name="remove" value="True">
+                                    <input type="submit" value="-" class="btn btn-primary">
+                                </form>
+                                <div type="text-center col"> {{product|cart_quantity:request.session.cart}} in cart</div>
+                                <form action="cart" method="post" class="mx-2">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{product.id}}">
+                                    <input type="submit" value="+" class="btn btn-primary">
+                                </form>
+                        </td>
+                        <td>{{product.price|rs_symbol}}</td>
+                        <td>{{product|total_product:request.session.cart|rs_symbol}}</td>
+
+                        <td>
+                            <form action="cart" method="post" class="mx-2">
+                                {% csrf_token %}
+                                <input hidden type="text" name="product" value="{{product.id}}">
+                                <input hidden type="text" name="itemremove" value="True">
+                                <input type="submit" value="Remove" class="btn btn-primary">
+                            </form>
+                        </td>
+
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    <tfoot>
+                        <tr>
+                            <th colspan="5">TOTAL</th>
+                            <!-- in this he have to use only products because we are facting data from cary.py not from forloop -->
+                            <th>{{products|total_price:request.session.cart|rs_symbol}}</th>
+                        </tr>
+                    </tfoot>
+                </tbody>
+            </table>
+            <div class="d-grid gap-2 col-6 mx-auto mx-auto">
+                <button type="submit" class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#exampleModal"> Check Out </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Check Out</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="continer">
+                        <div class="" style="background-color: white;">
+                            <form class="row g-3" action="checkout" method="post">
+                                {% csrf_token %}
+                                <div class="col-md-6">
+                                    <label for="inputname" class="form-label">Name</label>
+                                    <input required type="text" class="form-control" id="inputname" name="name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputphone" class="form-label">Phone No</label>
+                                    <input required type="text" class="form-control" id="inputphone" name="phone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputpincode" class="form-label">Pincode</label>
+                                    <input required type="text" class="form-control" id="inputpincode" name="pincode">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputlocality" class="form-label">Locality</label>
+                                    <input required type="text" class="form-control" id="inputlocality" name="locality">
+                                </div>
+                                <div class="col-12">
+                                    <label for="inputAddress" class="form-label">Address</label>
+                                    <input required type="text" class="form-control" id="inputAddress" placeholder="1234 Main St" name="address">
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label for="inputCity" class="form-label">City</label>
+                                    <input required type="text" class="form-control" id="inputCity" name="city">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="inputCity" class="form-label">State</label>
+                                    <input required type="text" class="form-control" id="inputCity" name="state">
+                                </div>
+
+                                {% comment %} <div class="modal-footer">
+                                    <div class="d-grid gap-2 col-6 mx-auto mx-auto">
+                                        <input type="submit" class="btn btn-primary" value="Place Order">
+                                    </div>
+                                </div> {% endcomment %}
+
+                                <form action="https://www.example.com/payment/success/" method="POST">
+                                {% csrf_token %}
+                                    <script
+                                        src="https://checkout.razorpay.com/v1/checkout.js"
+                                        data-key="rzp_test_NKP3ttSeDQPZSu" 
+                                        data-amount="{{products|order_price:request.session.cart}}"
+                                        data-currency="INR"
+                                        data-order_id="{{payment.id}}"
+                                        data-buttontext="Pay with Razorpay" 
+                                        data-name="E-Shop"
+                                        data-description="{{product.name}}"
+                                        data-image= ''
+                                        data-prefill.name=""
+                                        data-prefill.email=""
+                                        data-theme.color="#F37254"
+                                    ></script>
+                                    <input type="hidden" custom="Hidden Element" name="hidden">
+                                    </form>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% endblock body %}

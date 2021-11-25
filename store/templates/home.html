@@ -1,0 +1,111 @@
+{% extends 'base.html' %} {% block title %}E - Store{% endblock title %} 
+{% block head %}
+<style>
+/* width */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: gray; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+body {overflow-x: hidden;}
+</style>
+{% endblock head %}
+{% block body %} {% load static %} {% load cart %}
+
+<div class="continer-fluid">
+    <div class="row py-4">
+        <div class="col-lg-2 mx-auto">
+            <div class="list-group">
+                <li class="list-group-item active" aria-current="true">Category</li>
+                <a class="list-group-item list-group-item-secondary" href="/" role="button" my-2>All Product</a> {% for category in categorys %}
+                <a class="list-group-item list-group-item-action" href="/?category={{category.id}}" role="button" my-2>{{category.name}}</a> {% endfor %}
+
+            </div>
+        </div>
+
+        <div id="product" class="col-lg-10">
+            <div class="row mx-auto">
+                {% for product in products %}
+                <div class="card mx-auto py-2 mb-4" id="{{product.id}}" style="width: 18rem;">
+                    <img src={{product.image}} class="card-img-top" alt="..." style="
+                        width: 100%;
+                        height: 25vw;
+                        object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{product.name}}</h6>
+                        <p class="card-text">
+                            <h6>{{product.price|rs_symbol}}</h6>
+                        </p>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-warning " data-bs-toggle="modal" data-bs-target="#exampleModal-{{forloop.counter}}">View</button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal-{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+
+                                <div class="modal-content p-2">
+                                    <div class="modal-header">
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-header">
+                                        <img src={{product.image}} class="card-img-top" alt="..." style="width: 100%; height: 25vw; object-fit: cover;">
+                                    </div>
+                                    <div class="modal-title  py-4 px-4">
+                                        <h5 class="modal-title" id="exampleModalLabel">{{product.name}}</h5>
+                                    </div>
+                                    <div class="modal-headers px-4">
+                                        <h5>{{product.price|rs_symbol}}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{product.details}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            {% comment %} this products is from for loop & cart_product is name of filter which is defin in cart.py & in this we are calling session.cart which we have defined in home.py {% endcomment %} 
+                            {% comment %} {% if product|cart_product:request.session.cart %}
+                            <div class="btn-group">
+                                <form action="/#{{product.id}}" method="post" class="mx-2">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{product.id}}">
+                                    <input hidden type="text" name="remove" value="True">
+                                    <input type="submit" value="-" class="btn btn-primary">
+                                </form>
+                                <div type="text-center col"> {{product|cart_quantity:request.session.cart}} in cart</div>
+                                <form action="/#{{product.id}}" method="post" class="mx-2">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{product.id}}">
+                                    <input type="submit" value="+" class="btn btn-primary">
+                                </form> 
+                            </div>
+                            {% else %}{% endcomment %}
+                            <form action="/#{{product.id}}" method="post">
+                                {% csrf_token %}
+                                <input hidden type="text" name="product" value="{{product.id}}">
+                                <input type="submit" class="btn btn-primary" value="Add To Cart">
+                            </form>
+                            {% comment %} {% endif %} {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
